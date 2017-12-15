@@ -354,7 +354,6 @@ GameObject:
   - component: {fileID: 883983457}
   - component: {fileID: 883983458}
   - component: {fileID: 883983459}
-  - component: {fileID: 883983460}
   m_Layer: 0
   m_Name: SpeechTester
   m_TagString: Untagged
@@ -395,22 +394,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 883983456}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2b0da27b8e50c1347ad13fd84613cff2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &883983460
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 883983456}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 043a79cdc2bb4b64390b88a78d8d5b57, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  analyzedText: 
-  listening: 0
+  MaxLengthRecording: 10
+  bingSpeechApiKey: d20cb96b1f534f6b96189e83eb388752
 --- !u!1 &937999545
 GameObject:
   m_ObjectHideFlags: 0
