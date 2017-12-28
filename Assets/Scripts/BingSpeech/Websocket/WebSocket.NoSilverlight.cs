@@ -12,7 +12,7 @@ namespace WebSocket4Net
 #if NETCORE
        private SslProtocols m_SecureProtocols = SslProtocols.Tls11 | SslProtocols.Tls12;
 #else
-       private SslProtocols m_SecureProtocols = SslProtocols.Default;
+       private SslProtocols m_SecureProtocols = SslProtocols.None;
 #endif
 
         private TcpClientSession CreateSecureTcpSession()

@@ -6,10 +6,10 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Security;
-using System.Security.Cryptography.X509Certificates;
+//using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using UnityEngine;
-using WebSocket4Net;
+using WebSocketSharp;
 
 public class BingSpeechWebSocketClient : MonoBehaviour
 {
@@ -43,7 +43,7 @@ public class BingSpeechWebSocketClient : MonoBehaviour
     public void Start()
     {
         audioFile = Path.Combine(Application.persistentDataPath, "Recording.wav");
-        ServicePointManager.ServerCertificateValidationCallback = new RemoteCertificateValidationCallback(CheckValidCertificateCallback);
+       // ServicePointManager.ServerCertificateValidationCallback = new RemoteCertificateValidationCallback(CheckValidCertificateCallback);
     }
 
     public void StartListening()
@@ -76,15 +76,18 @@ public class BingSpeechWebSocketClient : MonoBehaviour
         this.OpenWebsocket();
 
         //Configure events
-        socket.MessageReceived += (sender, e) =>
+        socket.OnMessage += (sender, e) =>
         {
-            var socketMessage = new BingSocketTextMessage(e.Message);
+            var socketMessage = new BingSocketTextMessage(e.Data);
             var message = socketMessage.AsMessage();
 
             //Broadcasting message to registered
-            OnMessageReceived?.Invoke(message);
+            if (OnMessageReceived != null)
+            {
+                OnMessageReceived.Invoke(message);
+            }
 
-            Debug.Log(e.Message);
+            Debug.Log(e.Data);
 
             //Handling event
             if (message is SpeechFragmentMessage)
@@ -102,22 +105,21 @@ public class BingSpeechWebSocketClient : MonoBehaviour
             else if (message is TurnEndMessage)
             {
                 socket.Close();
-                socket.Dispose();
             }
         };
 
-        socket.Opened += (sender, e) =>
+        socket.OnOpen += (sender, e) =>
         {
             this.SendSpeechConfig();
             this.SendFirstAudioPart();
         };
 
-        socket.Error += (sender, e) =>
+        socket.OnError += (sender, e) =>
         {
             Debug.LogError(e.Exception);
         };
 
-        socket.Open();
+        socket.Connect();
     }
 
     IEnumerator GetToken()
@@ -139,7 +141,7 @@ public class BingSpeechWebSocketClient : MonoBehaviour
             new KeyValuePair<string, string>( "X-ConnectionId", connectionId ),
         };
 
-        socket = new WebSocket(bingAPIUrl, null, null, websocketheaders);
+        socket = new WebSocket(bingAPIUrl, websocketheaders);
     }
 
     public void SendSpeechConfig()
@@ -188,9 +190,9 @@ public class BingSpeechWebSocketClient : MonoBehaviour
     {
         var outputBuilder = new StringBuilder();
         outputBuilder.Append("path:audio\r\n");
-        outputBuilder.Append($"x-requestid:{requestid}\r\n");
-        outputBuilder.Append($"x-timestamp:{DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.fffK")}\r\n");
-        outputBuilder.Append($"content-type:audio/x-wav\r\n");
+        outputBuilder.Append("x-requestid:" + requestid + "\r\n");
+        outputBuilder.Append("x-timestamp:" + DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.fffK") + "\r\n");
+        outputBuilder.Append("content-type:audio/x-wav\r\n");
 
         var headerBytes = Encoding.ASCII.GetBytes(outputBuilder.ToString());
         var headerbuffer = new ArraySegment<byte>(headerBytes, 0, headerBytes.Length);
@@ -204,7 +206,7 @@ public class BingSpeechWebSocketClient : MonoBehaviour
             var riffHeaderBytes = riff.RiffHeader.Bytes;
             var arr = headerHead.Concat(headerBytes).Concat(riffHeaderBytes).ToArray();
             var arrSeg = new ArraySegment<byte>(arr, 0, arr.Length);
-            socket.Send(new List<ArraySegment<byte>>() { arrSeg });
+            socket.Send(arr);
         }
     }
 
@@ -220,9 +222,9 @@ public class BingSpeechWebSocketClient : MonoBehaviour
                 {
                     var outputBuilder = new StringBuilder();
                     outputBuilder.Append("path:audio" + Environment.NewLine);
-                    outputBuilder.Append($"x-requestid:{requestid}" + Environment.NewLine);
-                    outputBuilder.Append($"x-timestamp:{DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.fffK")}" + Environment.NewLine);
-                    outputBuilder.Append($"content-type:audio/x-wav" + Environment.NewLine);
+                    outputBuilder.Append("x-requestid:" + requestid +  Environment.NewLine);
+                    outputBuilder.Append("x-timestamp:" + DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.fffK") + Environment.NewLine);
+                    outputBuilder.Append("content-type:audio/x-wav" + Environment.NewLine);
 
                     var headerBytes = Encoding.ASCII.GetBytes(outputBuilder.ToString());
                     var headerbuffer = new ArraySegment<byte>(headerBytes, 0, headerBytes.Length);
@@ -243,7 +245,7 @@ public class BingSpeechWebSocketClient : MonoBehaviour
                     var arr = headerHead.Concat(headerBytes).Concat(chunkHeader).Concat(dataArray).ToArray();
                     var arrSeg = new ArraySegment<byte>(arr, 0, arr.Length);
 
-                    socket.Send(new List<ArraySegment<byte>>() { arrSeg });
+                    socket.Send(arr);
                 }
 
                 //Move to the next RIFF chunk if there is one. 
@@ -253,9 +255,9 @@ public class BingSpeechWebSocketClient : MonoBehaviour
             {
                 var outputBuilder = new StringBuilder();
                 outputBuilder.Append("path:audio" + Environment.NewLine);
-                outputBuilder.Append($"x-requestid:{requestid}" + Environment.NewLine);
-                outputBuilder.Append($"x-timestamp:{DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.fffK")}" + Environment.NewLine);
-                outputBuilder.Append($"content-type:audio/x-wav" + Environment.NewLine);
+                outputBuilder.Append("x-requestid:" + requestid + Environment.NewLine);
+                outputBuilder.Append("x-timestamp:" + DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ss.fffK") + Environment.NewLine);
+                outputBuilder.Append("content-type:audio/x-wav" + Environment.NewLine);
 
                 var headerBytes = Encoding.ASCII.GetBytes(outputBuilder.ToString());
                 var headerbuffer = new ArraySegment<byte>(headerBytes, 0, headerBytes.Length);
@@ -267,34 +269,34 @@ public class BingSpeechWebSocketClient : MonoBehaviour
                 var arr = headerHead.Concat(headerBytes).ToArray();
                 var arrSeg = new ArraySegment<byte>(arr, 0, arr.Length);
 
-                socket.Send(new List<ArraySegment<byte>>() { arrSeg });
+                socket.Send(arr);
             }
         }
     }
 
-    public bool CheckValidCertificateCallback(System.Object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
-    {
-        bool valid = true;
+    //public bool CheckValidCertificateCallback(System.Object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
+    //{
+    //    bool valid = true;
 
-        // If there are errors in the certificate chain, look at each error to determine the cause.
-        if (sslPolicyErrors != SslPolicyErrors.None)
-        {
-            for (int i = 0; i < chain.ChainStatus.Length; i++)
-            {
-                if (chain.ChainStatus[i].Status != X509ChainStatusFlags.RevocationStatusUnknown)
-                {
-                    chain.ChainPolicy.RevocationFlag = X509RevocationFlag.EntireChain;
-                    chain.ChainPolicy.RevocationMode = X509RevocationMode.Online;
-                    chain.ChainPolicy.UrlRetrievalTimeout = new TimeSpan(0, 1, 0);
-                    chain.ChainPolicy.VerificationFlags = X509VerificationFlags.AllFlags;
-                    bool chainIsValid = chain.Build((X509Certificate2)certificate);
-                    if (!chainIsValid)
-                    {
-                        valid = false;
-                    }
-                }
-            }
-        }
-        return valid;
-    }
+    //    // If there are errors in the certificate chain, look at each error to determine the cause.
+    //    if (sslPolicyErrors != SslPolicyErrors.None)
+    //    {
+    //        for (int i = 0; i < chain.ChainStatus.Length; i++)
+    //        {
+    //            if (chain.ChainStatus[i].Status != X509ChainStatusFlags.RevocationStatusUnknown)
+    //            {
+    //                chain.ChainPolicy.RevocationFlag = X509RevocationFlag.EntireChain;
+    //                chain.ChainPolicy.RevocationMode = X509RevocationMode.Online;
+    //                chain.ChainPolicy.UrlRetrievalTimeout = new TimeSpan(0, 1, 0);
+    //                chain.ChainPolicy.VerificationFlags = X509VerificationFlags.AllFlags;
+    //                bool chainIsValid = chain.Build((X509Certificate2)certificate);
+    //                if (!chainIsValid)
+    //                {
+    //                    valid = false;
+    //                }
+    //            }
+    //        }
+    //    }
+    //    return valid;
+    //}
 }

@@ -4,7 +4,6 @@ using System.Text;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using SuperSocket.ClientEngine;
 
 #if !NETFX_CORE
 using System.Security.Cryptography;

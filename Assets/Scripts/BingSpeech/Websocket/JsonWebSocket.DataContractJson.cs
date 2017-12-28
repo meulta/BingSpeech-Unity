@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Text;
-using System.Runtime.Serialization.Json;
+using Newtonsoft.Json;
 
 namespace WebSocket4Net
 {
@@ -14,15 +14,7 @@ namespace WebSocket4Net
         /// <returns></returns>
         protected virtual string SerializeObject(object target)
         {
-            var serializer = new DataContractJsonSerializer(target.GetType());
-
-            string result;
-            using (var ms = new MemoryStream())
-            {
-                serializer.WriteObject(ms, target);
-                result = Encoding.UTF8.GetString(ms.ToArray());
-            };
-
+            var result = JsonConvert.SerializeObject(target);
             return result;
         }
 
@@ -34,12 +26,7 @@ namespace WebSocket4Net
         /// <returns></returns>
         protected virtual object DeserializeObject(string json, Type type)
         {
-            var serializer = new DataContractJsonSerializer(type);
-
-            using (var ms = new MemoryStream(Encoding.UTF8.GetBytes(json)))
-            {
-                return serializer.ReadObject(ms);
-            };
+            return JsonConvert.DeserializeObject(json, type);
         }
     }
 }

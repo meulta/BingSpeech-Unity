@@ -538,11 +538,12 @@ PlayerSettings:
   scriptingDefineSymbols: {}
   platformArchitecture: {}
   scriptingBackend:
-    Metro: 1
+    Metro: 2
   incrementalIl2cppBuild: {}
   additionalIl2CppArgs: 
-  scriptingRuntimeVersion: 1
-  apiCompatibilityLevelPerPlatform: {}
+  scriptingRuntimeVersion: 0
+  apiCompatibilityLevelPerPlatform:
+    Metro: 1
   m_RenderingPath: 1
   m_MobileRenderingPath: 1
   metroPackageName: Bing Speech
@@ -626,7 +627,7 @@ PlayerSettings:
   cloudServicesEnabled:
     UNet: 1
   facebookSdkVersion: 7.9.4
-  apiCompatibilityLevel: 3
+  apiCompatibilityLevel: 2
   cloudProjectId: eddbc0f9-210f-434b-8d2d-70732224ba03
   projectName: Bing Speech
   organizationId: meulta
