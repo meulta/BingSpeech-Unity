@@ -1,5 +1,3 @@
-using Newtonsoft.Json;
-
 public class SpeechHypothesisMessage : MessageBase
 {
     public string Text { get; set; }

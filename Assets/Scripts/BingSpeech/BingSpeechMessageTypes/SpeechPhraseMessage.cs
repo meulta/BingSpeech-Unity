@@ -1,5 +1,3 @@
-using Newtonsoft.Json;
-
 public class SpeechPhraseMessage : MessageBase
 {
     public string RecognitionStatus { get; set; }
@@ -10,7 +8,6 @@ public class SpeechPhraseMessage : MessageBase
 
 
 }
-
 public class NBest
 {
     public double Confidence { get; set; }

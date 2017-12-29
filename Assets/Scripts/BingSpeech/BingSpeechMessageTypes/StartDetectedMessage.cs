@@ -1,4 +1,3 @@
-using Newtonsoft.Json;
 public class SpeechStartDetectedMessage : MessageBase
 {
     /// <summary>

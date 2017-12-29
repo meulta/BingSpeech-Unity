@@ -1,4 +1,3 @@
-
 public class SpeechConfigMessage : MessageBase
 {
     public class SystemO
@@ -18,7 +17,6 @@ public class SpeechConfigMessage : MessageBase
         private string version = "2.14324324";
         public string Version { get { return version; } set { version = value; } }
     }
-
     public class DeviceO
     {
         private string manufacturer = "Contoso";
